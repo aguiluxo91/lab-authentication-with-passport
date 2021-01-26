@@ -1,8 +1,8 @@
 const passport = require('passport');
 const mongoose = require('mongoose');
 const User = require('../models/User.model');
-const LocalStrategy = require('passport-local');
-const GoogleStrategy = require('passport-google-oauth').OAuth2Strategy
+const LocalStrategy = require('passport-local').Strategy;
+
 
 passport.serializeUser((user, next) => {
     next(null, user.id);
@@ -21,12 +21,14 @@ passport.use('local-auth', new LocalStrategy({
     User.findOne({ username })
         .then(user => {
             if (!user) {
-                next(null, null, { username: 'Invalid username or password'})
+                next(null, null, { username: 'Invalid username or password'});
             } else {
                 return user.checkPassword(password)
                     .then(match => {
-                        if (match) {
-                            
+                        if (!match) {
+                            next(null, null, { password: 'Invalid username or password'});
+                        } else {
+                            next(null, user);
                         }
                     })
             }

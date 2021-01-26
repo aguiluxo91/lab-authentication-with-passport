@@ -8,6 +8,9 @@ const hbs = require('hbs');
 const mongoose = require('mongoose');
 const logger = require('morgan');
 const path = require('path');
+const passport = require('passport');
+const session = require('./configs/session.config');
+require('./configs/passport.config');
 
 mongoose
   .connect('mongodb://localhost/auth-with-passport', {
@@ -28,6 +31,15 @@ app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
+app.use(session);
+app.use(passport.initialize());
+app.use(passport.session());
+
+app.use((req, res, next) => {
+  res.locals.path = req.path;
+  res.locals.currentUser = req.user;
+  next();
+});
 
 // Express View engine setup
 
